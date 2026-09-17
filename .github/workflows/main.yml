@@ -27,6 +27,10 @@ jobs:
       - name: Create Android Project Structure
         run: flutter create . --platforms=android --project-name=jarvis_poco_app
 
+      - name: Enable Internet Permission in Android Manifest
+        run: |
+          sed -i 's/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">\n    <uses-permission android:name="android.permission.INTERNET"\/>/' android/app/src/main/AndroidManifest.xml
+
       - name: Install Dependencies
         run: flutter pub get
 
