@@ -57,8 +57,6 @@ jobs:
                   t += int(m[1]); sk += int(m[2]); f += int(m[3]) + int(m[4])
               print(f"{mod}: {t} tests, {f} failed, {sk} skipped")
           PY
-      - name: Show exported Room schema
-        run: cat app/schemas/com.personal.workoutcoach.data.db.AppDatabase/1.json
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug
       - name: Android lint
