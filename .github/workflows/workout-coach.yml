@@ -1,0 +1,48 @@
+name: Workout Coach CI
+
+on:
+  push:
+    paths: [ "workout-coach/**", ".github/workflows/workout-coach.yml" ]
+  pull_request:
+    paths: [ "workout-coach/**", ".github/workflows/workout-coach.yml" ]
+  workflow_dispatch:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: workout-coach/backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: node --test
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults: { run: { working-directory: workout-coach } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit, database and UI (Robolectric) tests
+        run: ./gradlew :core:test :app:testDebugUnitTest --stacktrace
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug
+      - name: Android lint
+        run: ./gradlew :app:lintDebug
+      - name: Build release (unsigned unless keystore configured)
+        run: ./gradlew :app:assembleRelease
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports
+          path: |
+            workout-coach/core/build/reports/tests
+            workout-coach/app/build/reports
+            workout-coach/app/build/test-results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: workout-coach-apks
+          path: workout-coach/app/build/outputs/apk/**/*.apk
