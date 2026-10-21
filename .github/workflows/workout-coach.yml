@@ -44,6 +44,21 @@ jobs:
                   print(html.unescape(m.group(4))[:4000])
                   print("::endgroup::")
           PY
+      - name: Test summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, re
+          for mod in ("core", "app"):
+              t = f = sk = 0
+              for x in glob.glob(f"{mod}/build/test-results/**/TEST-*.xml", recursive=True):
+                  h = open(x).read(600)
+                  m = re.search(r'tests="(\d+)" skipped="(\d+)" failures="(\d+)" errors="(\d+)"', h)
+                  t += int(m[1]); sk += int(m[2]); f += int(m[3]) + int(m[4])
+              print(f"{mod}: {t} tests, {f} failed, {sk} skipped")
+          PY
+      - name: Show exported Room schema
+        run: cat app/schemas/com.personal.workoutcoach.data.db.AppDatabase/1.json
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug
       - name: Android lint

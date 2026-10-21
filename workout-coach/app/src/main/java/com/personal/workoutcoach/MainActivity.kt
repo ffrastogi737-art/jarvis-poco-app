@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,9 +61,9 @@ class MainActivity : ComponentActivity() {
 
 enum class Tab(val route: String, val label: String, val icon: ImageVector) {
     HOME("home", "Home", Icons.Default.Home),
-    COACH("coach", "Coach", Icons.Default.Chat),
+    COACH("coach", "Coach", Icons.AutoMirrored.Filled.Chat),
     WORKOUT("workout", "Workout", Icons.Default.FitnessCenter),
-    PROGRESS("progress", "Progress", Icons.Default.ShowChart),
+    PROGRESS("progress", "Progress", Icons.AutoMirrored.Filled.ShowChart),
     SETTINGS("settings", "Profile", Icons.Default.Person),
 }
 
