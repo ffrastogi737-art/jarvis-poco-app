@@ -23,11 +23,16 @@ object ScheduleEngine {
         planned.filter { it.isBefore(today) && it !in completed && it !in resolved }.sorted()
 
     /**
-     * Up to [max] dates from today within the next [windowDays] that are free and not directly next to
-     * another training session. Empty means: just continue with the next planned session.
+     * Up to [max] free dates from today within the next [windowDays]. Never the day before/after a
+     * completed session (recovery). Dates with no planned neighbour come first; a date next to a
+     * planned session is offered only as a fallback (the user can always skip instead).
+     * Empty means: just continue with the next planned session.
      */
-    fun rescheduleOptions(today: LocalDate, occupied: Set<LocalDate>, windowDays: Int = 4, max: Int = 2): List<LocalDate> =
-        (0 until windowDays).map { today.plusDays(it.toLong()) }
-            .filter { it !in occupied && it.minusDays(1) !in occupied && it.plusDays(1) !in occupied }
+    fun rescheduleOptions(today: LocalDate, occupied: Set<LocalDate>, completed: Set<LocalDate> = emptySet(), windowDays: Int = 4, max: Int = 2): List<LocalDate> {
+        fun near(d: LocalDate, set: Set<LocalDate>) = d.minusDays(1) in set || d.plusDays(1) in set
+        return (0 until windowDays).map { today.plusDays(it.toLong()) }
+            .filter { it !in occupied && it !in completed && !near(it, completed) }
+            .sortedWith(compareBy({ near(it, occupied) }, { it }))
             .take(max)
+    }
 }

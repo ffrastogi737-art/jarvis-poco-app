@@ -27,6 +27,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.personal.workoutcoach.AppContainer
 import com.personal.workoutcoach.WorkoutCoachApp
 
+/** Periodic UI tickers (elapsed time, rest countdown). Tests switch them off so Compose can go idle. */
+object UiClock { @Volatile var tickingEnabled = true }
+
 @Composable
 fun appContainer(): AppContainer = (LocalContext.current.applicationContext as WorkoutCoachApp).container
 

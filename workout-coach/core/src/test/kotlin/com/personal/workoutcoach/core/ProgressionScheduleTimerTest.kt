@@ -97,11 +97,18 @@ class ScheduleTest {
     }
 
     @Test fun rescheduleKeepsRestDaysAndNeverDoublesUp() {
-        // Missed Wed; today Thu; Fri is planned. Thu is next to Fri → not offered; Sat is next to Fri → not offered; Sun ok.
+        // Missed Wed; today Thu; Fri planned. Sun has no planned neighbour so it comes first; Thu is a fallback.
         val thu = mon.plusDays(3)
         val opts = ScheduleEngine.rescheduleOptions(thu, occupied = setOf(mon, mon.plusDays(4)))
-        assertEquals(listOf(mon.plusDays(6)), opts)
-        for (o in opts) assertFalse(o == mon.plusDays(4))
+        assertEquals(listOf(mon.plusDays(6), thu), opts)
+        assertFalse(mon.plusDays(4) in opts, "never the same day as another session")
+    }
+
+    @Test fun neverNextToACompletedSession() {
+        val tue = mon.plusDays(1)
+        val opts = ScheduleEngine.rescheduleOptions(tue, occupied = setOf(mon.plusDays(4)), completed = setOf(mon))
+        assertFalse(tue in opts) // trained yesterday
+        assertEquals(mon.plusDays(2), opts.first())
     }
 
     @Test fun noRealisticSlotMeansContinueWithNextSession() {

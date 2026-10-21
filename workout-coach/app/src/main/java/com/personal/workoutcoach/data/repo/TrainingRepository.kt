@@ -106,10 +106,10 @@ class TrainingRepository(
     }
 
     suspend fun rescheduleOptions(): List<LocalDate> {
-        val occupied = db.schedule().all()
-            .filter { it.status == ScheduleStatus.PLANNED.name || it.status == ScheduleStatus.DONE.name }
-            .map { LocalDate.ofEpochDay(it.date) }.toSet()
-        return ScheduleEngine.rescheduleOptions(today(), occupied)
+        val entries = db.schedule().all()
+        val occupied = entries.filter { it.status == ScheduleStatus.PLANNED.name }.map { LocalDate.ofEpochDay(it.date) }.toSet()
+        val completed = entries.filter { it.status == ScheduleStatus.DONE.name }.map { LocalDate.ofEpochDay(it.date) }.toSet()
+        return ScheduleEngine.rescheduleOptions(today(), occupied, completed)
     }
 
     suspend fun reschedule(entryId: Long, newDate: LocalDate, reason: MissReason) = db.withTransaction {

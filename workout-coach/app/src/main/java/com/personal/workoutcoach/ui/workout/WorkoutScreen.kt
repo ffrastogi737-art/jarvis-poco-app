@@ -131,7 +131,7 @@ private fun ActiveWorkout(a: SessionWithExercises, vm: WorkoutViewModel, onLeave
     val previous by vm.previous.collectAsStateWithLifecycle()
 
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1000) } }
+    LaunchedEffect(Unit) { while (UiClock.tickingEnabled) { now = System.currentTimeMillis(); delay(1000) } }
 
     BackHandler { confirmLeave = true }
 
@@ -263,7 +263,7 @@ private fun RestTimerCard(vm: WorkoutViewModel) {
     val t = timer ?: return
     var nowMs by remember { mutableLongStateOf(vm.clock()) }
     LaunchedEffect(t.status, t.endsAtMs) {
-        while (t.status == RestTimer.Status.RUNNING) {
+        while (t.status == RestTimer.Status.RUNNING && UiClock.tickingEnabled) {
             nowMs = vm.clock()
             if (t.isFinished(nowMs)) {
                 vm.tick()
