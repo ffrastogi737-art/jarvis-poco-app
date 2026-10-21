@@ -127,7 +127,7 @@ class TrainingRepository(
 
     suspend fun postponeCount(): Int {
         val cutoff = today().minusDays(14).toEpochDay()
-        return db.schedule().all().count { it.date >= cutoff && (it.status == ScheduleStatus.MISSED.name || it.status == ScheduleStatus.RESCHEDULED.name) }
+        return db.schedule().all().count { it.date >= cutoff && it.status in setOf(ScheduleStatus.MISSED.name, ScheduleStatus.RESCHEDULED.name, ScheduleStatus.SKIPPED.name) }
     }
 
     // ---------------- Planning

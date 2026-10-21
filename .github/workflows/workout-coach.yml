@@ -32,6 +32,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit, database and UI (Robolectric) tests
         run: ./gradlew :core:test :app:testDebugUnitTest --stacktrace
+      - name: Print test failures
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import glob, re, html
+          for f in glob.glob('**/build/test-results/**/TEST-*.xml', recursive=True):
+              s = open(f).read()
+              for m in re.finditer(r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<failure message="(.*?)" type="[^"]*">(.*?)</failure>', s, re.S):
+                  print("::group::FAILED", m.group(2), m.group(1))
+                  print(html.unescape(m.group(4))[:4000])
+                  print("::endgroup::")
+          PY
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug
       - name: Android lint

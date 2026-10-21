@@ -33,6 +33,10 @@ class UiFlowTest {
     private fun waitFor(matcher: SemanticsMatcher, timeoutMs: Long = 10_000) =
         rule.waitUntil(timeoutMs) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
 
+    /** Waits for a database condition while letting main-thread coroutines (viewModelScope) run. */
+    private fun waitForDb(timeoutMs: Long = 10_000, condition: suspend () -> Boolean) =
+        rule.waitUntil(timeoutMs) { rule.waitForIdle(); runBlocking { condition() } }
+
     private fun onboard() {
         waitFor(hasTestTag("get_started"))
         rule.onNodeWithText("English").performScrollTo().performClick()
@@ -99,7 +103,7 @@ class UiFlowTest {
         tab("Profile")
         rule.onNodeWithText("Hinglish").performScrollTo().performClick()
         rule.onNodeWithTag("save_profile").performScrollTo().performClick()
-        rule.waitUntil(10_000) { runBlocking { app.container.db.profile().get()!!.language } == "HINGLISH" }
+        waitForDb { app.container.db.profile().get()!!.language == "HINGLISH" }
 
         tab("Coach")
         waitFor(hasTestTag("chat_input"))
@@ -129,8 +133,8 @@ class UiFlowTest {
         onboard()
         tab("Profile")
         rule.onNodeWithTag("reminder_DAILY_CHECKIN").performScrollTo().performClick()
-        rule.waitUntil(10_000) { runBlocking { app.container.db.reminders().get("DAILY_CHECKIN")!!.enabled } }
+        waitForDb { app.container.db.reminders().get("DAILY_CHECKIN")!!.enabled }
         rule.onNodeWithTag("pause_reminders").performScrollTo().performClick()
-        rule.waitUntil(10_000) { runBlocking { app.container.settings.current().remindersPaused } }
+        waitForDb { app.container.settings.current().remindersPaused }
     }
 }

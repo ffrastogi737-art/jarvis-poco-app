@@ -188,11 +188,12 @@ private fun ActiveWorkout(a: SessionWithExercises, vm: WorkoutViewModel, onLeave
                 }
             }
             if (ex.exercise.status != "SKIPPED") {
-                if (loads.isNotEmpty()) ChoiceChips(loads, weight, { "${fmt(it)} kg" }) { weight = it }
+                val selectedWeight = weight?.takeIf { it in loads } ?: loads.firstOrNull()
+                if (loads.isNotEmpty()) ChoiceChips(loads, selectedWeight, { "${fmt(it)} kg" }) { weight = it }
                 else Text("Bodyweight", style = MaterialTheme.typography.bodySmall)
                 if (timed) Stepper("Seconds held", secs, { secs = it }, 0..600, 5) else Stepper("Reps done", reps, { reps = it }, 0..100)
                 Button(
-                    onClick = { vm.logSet(ex, weight.takeIf { loads.isNotEmpty() }, if (timed) null else reps, if (timed) secs else null) },
+                    onClick = { vm.logSet(ex, selectedWeight, if (timed) null else reps, if (timed) secs else null) },
                     enabled = !paused,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("log_set"),
                 ) { Text("Log set ${ex.sets.size + 1}" + if (ex.sets.size >= ex.exercise.plannedSets) " (extra)" else "") }
