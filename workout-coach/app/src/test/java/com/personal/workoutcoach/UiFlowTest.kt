@@ -69,14 +69,14 @@ class UiFlowTest {
         waitFor(hasTestTag("timer_text"))
         rule.onNodeWithTag("timer_pause").performScrollTo().performClick()
         waitFor(hasTestTag("timer_resume"))
-        rule.onNodeWithTag("timer_resume").performClick()
+        rule.onNodeWithTag("timer_resume").performScrollTo().performClick()
         waitFor(hasTestTag("timer_pause"))
-        rule.onNodeWithTag("timer_skip").performClick()
+        rule.onNodeWithTag("timer_skip").performScrollTo().performClick()
         waitFor(hasText("Rest over"))
 
-        rule.onNodeWithTag("pause").performClick()
+        rule.onNodeWithTag("pause").performScrollTo().performClick()
         waitFor(hasTestTag("resume"))
-        rule.onNodeWithTag("resume").performClick()
+        rule.onNodeWithTag("resume").performScrollTo().performClick()
         waitFor(hasTestTag("pause"))
 
         val sets = runBlocking { app.container.db.sessions().allSets() }
