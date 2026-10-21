@@ -1,0 +1,12 @@
+{
+  "name": "workout-coach-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal AI proxy for the Personal AI Workout Coach. Holds provider keys so the Android app never does.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  }
+}
