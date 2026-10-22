@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 import '../services/jarvis.dart';
 import '../services/notify.dart';
@@ -33,7 +32,7 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     if (_ringing) {
-      FlutterRingtonePlayer().playRingtone(looping: true, asAlarm: false);
+      PhoneActions.ring(true);
       _vibrate = Timer.periodic(const Duration(milliseconds: 1200), (_) => HapticFeedback.heavyImpact());
       _timeout = Timer(const Duration(seconds: 45), () => _hangUp(missed: true));
     } else {
@@ -43,7 +42,7 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   void _stopRinging() {
-    FlutterRingtonePlayer().stop();
+    PhoneActions.ring(false);
     _vibrate?.cancel();
     _timeout?.cancel();
   }

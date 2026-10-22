@@ -2,6 +2,8 @@ package com.krishna.jarvis.jarvis_poco_app
 
 import android.content.ComponentName
 import android.content.Intent
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.os.Build
 import android.provider.Settings
 import android.telephony.SmsManager
@@ -11,6 +13,8 @@ import io.flutter.plugin.common.MethodChannel
 
 /** Phone-control bridge for JARVIS: open apps, send SMS, auto-send WhatsApp. */
 class MainActivity : FlutterActivity() {
+    private var ringtone: Ringtone? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "jarvis/device").setMethodCallHandler { call, result ->
@@ -43,6 +47,17 @@ class MainActivity : FlutterActivity() {
                         val me = ComponentName(this, JarvisAccessibility::class.java).flattenToString()
                         val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
                         result.success(enabled.split(':').any { it.equals(me, ignoreCase = true) })
+                    }
+                    "ringStart" -> {
+                        ringtone?.stop()
+                        ringtone = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+                        if (Build.VERSION.SDK_INT >= 28) ringtone?.isLooping = true
+                        ringtone?.play()
+                        result.success(true)
+                    }
+                    "ringStop" -> {
+                        ringtone?.stop()
+                        result.success(true)
                     }
                     "openAccessibilitySettings" -> {
                         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

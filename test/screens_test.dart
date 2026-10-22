@@ -23,7 +23,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(const MethodChannel('dexterous.com/flutter/local_notifications'), (_) async => null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('flutter_ringtone_player'), (_) async => null);
+        .setMockMethodCallHandler(const MethodChannel('jarvis/device'), (_) async => null);
     final fonts = '${Platform.environment['FLUTTER_ROOT'] ?? ''}/bin/cache/artifacts/material_fonts';
     if (File('$fonts/Roboto-Regular.ttf').existsSync()) {
       Future<void> load(String family, List<String> files) async {

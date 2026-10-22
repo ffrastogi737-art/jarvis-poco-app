@@ -10,6 +10,8 @@ class PhoneActions {
   static const _device = MethodChannel('jarvis/device'); // MainActivity.kt
 
   static Future<bool> autoSendEnabled() async => await _device.invokeMethod<bool>('accessibilityEnabled') ?? false;
+  /// Plays/stops the phone's own ringtone for incoming JARVIS calls.
+  static Future<void> ring(bool on) => _device.invokeMethod(on ? 'ringStart' : 'ringStop').catchError((_) {});
   static Future<void> openAutoSendSettings() => _device.invokeMethod('openAccessibilitySettings');
 
   /// Opens an installed app by (approximate) name, e.g. "insta", "Google Pay", "camera".
