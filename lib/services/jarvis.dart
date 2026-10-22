@@ -58,9 +58,10 @@ TOOLS. To use one, put a line in your reply exactly like:
 - youtube_play {query}: play a video in the YouTube app
 - youtube_summary {query_or_url}: get a video's transcript so you can summarise it
 - call {to}: place a phone call (contact name or number)
-- sms {to, text}
-- whatsapp {to, text}
-- open_url {url}: open a website or app link
+- sms {to, text}: sends the SMS
+- whatsapp {to, text}: sends the WhatsApp message
+- open_app {name}: open any installed app on this phone (e.g. "Instagram", "Camera", "PhonePe")
+- open_url {url}: open a website or link
 - add_task {title, due?}: due is local time "YYYY-MM-DDTHH:MM"; you will phone $name when it is due
 - complete_task {title}
 - add_note {title, content}
@@ -187,10 +188,16 @@ Rules: web_search, news, weather, youtube_summary and device return their output
         case 'call':
           if (store.get<bool>('confirmActions') && !await confirm('Call ${s('to')}?')) return (text: 'Call cancelled', info: false);
           return (text: await PhoneActions.call(s('to')), info: false);
-        case 'sms':
-          return (text: await PhoneActions.sms(s('to'), s('text')), info: false);
-        case 'whatsapp':
-          return (text: await PhoneActions.whatsapp(s('to'), s('text')), info: false);
+        case 'sms' || 'whatsapp':
+          if (store.get<bool>('confirmActions') && !await confirm('Send "${s('text')}" to ${s('to')} on ${tool == 'sms' ? 'SMS' : 'WhatsApp'}?')) {
+            return (text: 'Message cancelled', info: false);
+          }
+          return (
+            text: await (tool == 'sms' ? PhoneActions.sms(s('to'), s('text')) : PhoneActions.whatsapp(s('to'), s('text'))),
+            info: false
+          );
+        case 'open_app':
+          return (text: await PhoneActions.openApp(s('name')), info: false);
         case 'open_url':
           await launchUrl(Uri.parse(s('url')), mode: LaunchMode.externalApplication);
           return (text: 'Opened ${s('url')}', info: false);

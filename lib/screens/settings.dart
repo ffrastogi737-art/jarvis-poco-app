@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../services/brain.dart';
 import '../services/jarvis.dart';
 import '../services/notify.dart';
+import '../services/phone.dart';
 import '../services/store.dart';
 import '../services/voice.dart';
 import '../ui/shell.dart';
@@ -181,6 +182,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
     'Microphone': Permission.microphone,
     'Contacts': Permission.contacts,
     'Phone calls': Permission.phone,
+    'Send SMS': Permission.sms,
     'Notifications': Permission.notification,
   };
 
@@ -200,7 +202,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
   @override
   Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(14, 0, 14, 16), children: [
         const PageTitle('Privacy & Security', 'Data, permissions and security.'),
-        _switch('Confirm before calling', 'JARVIS asks before placing phone calls', 'confirmActions', after: () => setState(() {})),
+        _switch('Confirm calls & messages', 'JARVIS asks before calling or sending a message', 'confirmActions', after: () => setState(() {})),
         _section('PERMISSIONS'),
         for (final p in _perms.entries)
           FutureBuilder<PermissionStatus>(
@@ -223,6 +225,24 @@ class _PrivacyPageState extends State<PrivacyPage> {
           title: const Text('JARVIS calls (alarms & full-screen)', style: TextStyle(color: Colors.white)),
           subtitle: const Text('Lets JARVIS ring you on time, even on the lock screen', style: sub),
           trailing: TextButton(onPressed: Notify.requestPermissions, child: const Text('Allow')),
+        ),
+        FutureBuilder<bool>(
+          future: PhoneActions.autoSendEnabled().catchError((_) => false),
+          builder: (_, s) => ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            title: const Text('WhatsApp auto-send', style: TextStyle(color: Colors.white)),
+            subtitle: Text(
+                s.data == true
+                    ? 'On — JARVIS presses Send for messages you ask him to send'
+                    : 'Off — enable "JARVIS auto-send" in Accessibility, then come back',
+                style: TextStyle(color: s.data == true ? C.green : C.text2)),
+            trailing: TextButton(
+                onPressed: () async {
+                  await PhoneActions.openAutoSendSettings();
+                  setState(() {});
+                },
+                child: const Text('Setup')),
+          ),
         ),
         _section('YOUR DATA'),
         const Text('Everything (chats, memory, notes, tasks, keys) is stored only on this phone. '
