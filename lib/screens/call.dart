@@ -54,14 +54,14 @@ class _CallScreenState extends State<CallScreen> {
     final c = widget.incoming;
     final routine = c?.routineId == null ? null : store.routines.where((r) => r.id == c!.routineId).firstOrNull;
     if (routine != null) {
-      await _say('${_hello()}, sir. Running your ${routine.name} routine.');
+      await _say('${_hello()} Sir, आपका ${routine.name} routine शुरू कर रहा हूँ।');
       _caption = 'Working on it…';
       if (mounted) setState(() {});
       await _say(await jarvis.runRoutine(routine));
     } else if (c != null) {
       await _say(c.message);
     } else {
-      await _say('${_hello()}, sir. J.A.R.V.I.S. here. How may I help?');
+      await _say('${_hello()} Sir, JARVIS here. बताइए, क्या करना है?');
     }
     _loop();
   }
@@ -89,20 +89,20 @@ class _CallScreenState extends State<CallScreen> {
       try {
         heard = await voice.listen(onPartial: (p) => mounted ? setState(() => _caption = p) : null);
       } catch (e) {
-        await _say('I cannot hear you, sir. $e');
+        await _say('Sir, मैं आपको सुन नहीं पा रहा। $e');
         return;
       }
       if (_ended) return;
       if (heard.isEmpty) {
         if (++silence >= 3) {
-          await _say('I will let you go then, sir. Call me anytime.');
+          await _say('ठीक है Boss, जब ज़रूरत हो call कर लीजिए।');
           return _hangUp();
         }
         continue;
       }
       silence = 0;
       if (RegExp(r'\b(bye|goodbye|hang up|end call|that.?s all)\b|बाय|फोन रखो', caseSensitive: false).hasMatch(heard)) {
-        await _say('Very good, sir. Signing off.');
+        await _say('Very good, Sir. Signing off.');
         return _hangUp();
       }
       setState(() => _caption = 'Thinking…');
