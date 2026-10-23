@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold Rate Board</title>
+<!-- Written in ES5 + flexbox on purpose: LG webOS 3.5/4 (2017-18) browsers are Chrome 38-53. -->
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0604; color: #f6e7c1; font-family: Georgia, "Times New Roman", serif; overflow: hidden; }
+  body { background: radial-gradient(ellipse at 50% 0%, #3a1a0c 0%, #140906 55%, #070302 100%); }
+  .gold { color: #f5c542; text-shadow: 0 0 1.2vw rgba(245, 197, 66, .45); }
+  .wrap { display: flex; flex-direction: column; height: 100%; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 2.2vh 4vw 1.2vh; border-bottom: .3vh solid #b8860b; }
+  #shop { font-size: 5.6vh; letter-spacing: .15vw; }
+  #tag { font-size: 2.4vh; color: #d9c08a; margin-top: .6vh; }
+  .clock { text-align: right; }
+  #time { font-size: 5vh; }
+  #date { font-size: 2.4vh; color: #d9c08a; }
+  .title { text-align: center; font-size: 3.4vh; letter-spacing: .6vw; color: #d9c08a; padding: 2vh 0 1vh; }
+  .cards { flex: 1; display: flex; padding: 0 3vw 2vh; }
+  .card { flex: 1; margin: 0 1vw; border: .3vh solid #b8860b; border-radius: 2vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          background: linear-gradient(160deg, rgba(90, 50, 15, .55), rgba(20, 10, 5, .85)); box-shadow: 0 0 3vh rgba(245, 197, 66, .18) inset; }
+  .card.silver { border-color: #a9b4c2; box-shadow: 0 0 3vh rgba(200, 210, 225, .15) inset; }
+  .card.silver .gold { color: #e3e9f1; text-shadow: 0 0 1.2vw rgba(220, 230, 245, .4); }
+  .k { font-size: 6.5vh; font-weight: bold; }
+  .purity { font-size: 2.4vh; color: #d9c08a; margin: .4vh 0 3vh; }
+  .price { font-size: 7.4vh; font-weight: bold; white-space: nowrap; }
+  .unit { font-size: 2.4vh; color: #d9c08a; margin-top: 1vh; }
+  .trend { font-size: 2.6vh; margin-top: 1.5vh; height: 3vh; }
+  .up { color: #4cd964; } .down { color: #ff5a5a; }
+  .ticker { border-top: .3vh solid #b8860b; background: #1c0d06; overflow: hidden; white-space: nowrap; height: 7vh; line-height: 7vh; font-size: 3.4vh; }
+  .ticker span { display: inline-block; padding-left: 100%; -webkit-animation: run 30s linear infinite; animation: run 30s linear infinite; }
+  @-webkit-keyframes run { from { -webkit-transform: translateX(0); } to { -webkit-transform: translateX(-100%); } }
+  @keyframes run { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+  #status { position: absolute; right: 2vw; bottom: 8vh; font-size: 1.8vh; color: #a68b5b; }
+  #setup { display: none; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, .92); padding: 4vh 8vw; font-family: Arial, sans-serif; overflow: auto; }
+  #setup h2 { color: #f5c542; margin: 0 0 2vh; font-size: 4vh; }
+  #setup label { display: block; font-size: 2.4vh; margin: 1.4vh 0 .5vh; color: #d9c08a; }
+  #setup input { width: 100%; box-sizing: border-box; font-size: 2.8vh; padding: 1vh; background: #1c0d06; color: #fff; border: .2vh solid #b8860b; border-radius: 1vh; }
+  #setup input:focus { border-color: #fff; outline: none; }
+  .row { display: flex; } .row div { flex: 1; margin-right: 2vw; }
+  #setup button { font-size: 3vh; padding: 1.2vh 4vw; margin: 3vh 2vw 0 0; background: #b8860b; color: #000; border: .3vh solid #b8860b; border-radius: 1vh; }
+  #setup button:focus { border-color: #fff; }
+  .hint { font-size: 2vh; color: #a68b5b; margin-top: 1vh; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><div id="shop" class="gold">Shri Radha Krishna Jewellers</div><div id="tag">Purity you can trust • हॉलमार्क ज्वेलरी</div></div>
+    <div class="clock"><div id="time" class="gold">--:--</div><div id="date"></div></div>
+  </header>
+  <div class="title">आज का भाव • TODAY'S RATE</div>
+  <div class="cards">
+    <div class="card"><div class="k gold">24K</div><div class="purity">999 • Fine Gold</div><div class="price gold" id="p24">—</div><div class="unit">per 10 gram</div><div class="trend" id="t24"></div></div>
+    <div class="card"><div class="k gold">22K</div><div class="purity">916 • Hallmark</div><div class="price gold" id="p22">—</div><div class="unit">per 10 gram</div><div class="trend" id="t22"></div></div>
+    <div class="card"><div class="k gold">18K</div><div class="purity">750</div><div class="price gold" id="p18">—</div><div class="unit">per 10 gram</div><div class="trend" id="t18"></div></div>
+    <div class="card silver"><div class="k gold">चाँदी</div><div class="purity">Silver 999</div><div class="price gold" id="pAg">—</div><div class="unit">per 1 kg</div><div class="trend" id="tAg"></div></div>
+  </div>
+  <div class="ticker"><span id="offers" class="gold"></span></div>
+</div>
+<div id="status"></div>
+
+<div id="setup">
+  <h2>Board Settings</h2>
+  <div class="row">
+    <div><label>Shop name</label><input id="s_shop"></div>
+    <div><label>Tagline</label><input id="s_tag"></div>
+  </div>
+  <label>Offers / scrolling message</label><input id="s_offers">
+  <label>Premium over international price (%) — import duty + local margin</label><input id="s_premium" type="number" step="0.1">
+  <div class="hint">Your own rates below override the automatic ones. Leave blank for live automatic rates.</div>
+  <div class="row">
+    <div><label>24K ₹/10g</label><input id="s_r24" type="number"></div>
+    <div><label>22K ₹/10g</label><input id="s_r22" type="number"></div>
+    <div><label>18K ₹/10g</label><input id="s_r18" type="number"></div>
+    <div><label>Silver ₹/kg</label><input id="s_rAg" type="number"></div>
+  </div>
+  <button id="save">Save</button><button id="cancel">Cancel</button>
+  <div class="hint">Open this screen any time with the remote's OK / Enter button.</div>
+</div>
+
+<script>
+var GRAM_PER_OZ = 31.1034768;
+var DEFAULTS = {
+  shop: 'Shri Radha Krishna Jewellers',
+  tag: 'Purity you can trust • हॉलमार्क ज्वेलरी',
+  offers: 'मेकिंग चार्ज पर 20% छूट  •  पुराना सोना बदलें, नया ले जाएं  •  BIS Hallmark Certified  •  Rates are indicative, GST extra',
+  premium: '9', r24: '', r22: '', r18: '', rAg: ''
+};
+var FIELDS = ['shop', 'tag', 'offers', 'premium', 'r24', 'r22', 'r18', 'rAg'];
+
+function load(key, fallback) {
+  try { var v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; }
+}
+function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+
+var settings = load('board_settings', {});
+for (var i = 0; i < FIELDS.length; i++) if (settings[FIELDS[i]] === undefined) settings[FIELDS[i]] = DEFAULTS[FIELDS[i]];
+// URL parameters (e.g. ?r22=71500&premium=8) also set values, handy for a bookmarked link.
+location.search.replace(/[?&]([^=&]+)=([^&]*)/g, function (m, k, v) { if (FIELDS.indexOf(k) >= 0) settings[k] = decodeURIComponent(v.replace(/\+/g, ' ')); });
+
+/** Indian retail estimate from international spot prices (USD/oz) and USD->INR. */
+function computeRates(goldUsdOz, silverUsdOz, usdInr, premiumPct) {
+  var f = 1 + premiumPct / 100;
+  var g24 = goldUsdOz * usdInr / GRAM_PER_OZ * 10 * f;
+  return { r24: g24, r22: g24 * 0.916, r18: g24 * 0.75, rAg: silverUsdOz * usdInr / GRAM_PER_OZ * 1000 * f };
+}
+
+function rupees(n) {
+  var s = String(Math.round(n)), last3 = s.slice(-3), rest = s.slice(0, -3);
+  return '₹ ' + (rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' : '') + last3; // Indian grouping: 1,23,456
+}
+
+function getJson(url, done) {
+  var x = new XMLHttpRequest();
+  x.open('GET', url, true);
+  x.timeout = 15000;
+  x.onload = function () { try { done(x.status === 200 ? JSON.parse(x.responseText) : null); } catch (e) { done(null); } };
+  x.onerror = x.ontimeout = function () { done(null); };
+  x.send();
+}
+
+var live = load('board_live', null); // last good automatic rates, shown while offline
+var previous = load('board_prev', null);
+
+function render() {
+  document.getElementById('shop').innerHTML = escapeHtml(settings.shop);
+  document.getElementById('tag').innerHTML = escapeHtml(settings.tag);
+  document.getElementById('offers').innerHTML = escapeHtml(settings.offers);
+  var keys = ['r24', 'r22', 'r18', 'rAg'], ids = ['24', '22', '18', 'Ag'];
+  for (var i = 0; i < keys.length; i++) {
+    var manual = parseFloat(settings[keys[i]]);
+    var value = manual > 0 ? manual : (live ? live[keys[i]] : null);
+    document.getElementById('p' + ids[i]).innerHTML = value ? rupees(value) : '—';
+    var t = document.getElementById('t' + ids[i]);
+    t.className = 'trend';
+    t.innerHTML = '';
+    if (!(manual > 0) && live && previous && previous[keys[i]]) {
+      var diff = live[keys[i]] - previous[keys[i]];
+      if (Math.abs(diff) >= 1) {
+        t.className = 'trend ' + (diff > 0 ? 'up' : 'down');
+        t.innerHTML = (diff > 0 ? '▲ ' : '▼ ') + rupees(Math.abs(diff));
+      }
+    }
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function status(text) { document.getElementById('status').innerHTML = text; }
+
+function refresh() {
+  getJson('https://api.gold-api.com/price/XAU', function (gold) {
+    getJson('https://api.gold-api.com/price/XAG', function (silver) {
+      getJson('https://open.er-api.com/v6/latest/USD', function (fx) {
+        if (gold && silver && fx && fx.rates && fx.rates.INR) {
+          var next = computeRates(gold.price, silver.price, fx.rates.INR, parseFloat(settings.premium) || 0);
+          if (live && Math.round(live.r24) !== Math.round(next.r24)) { previous = live; save('board_prev', previous); }
+          live = next;
+          save('board_live', live);
+          status('Updated ' + clockText(new Date()));
+        } else {
+          status('Offline — showing last rates' + (live ? '' : ' (none yet)'));
+        }
+        render();
+      });
+    });
+  });
+}
+
+function clockText(d) {
+  var h = d.getHours(), m = d.getMinutes();
+  return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + (h < 12 ? 'AM' : 'PM');
+}
+
+function tick() {
+  var d = new Date();
+  var days = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  document.getElementById('time').innerHTML = clockText(d);
+  document.getElementById('date').innerHTML = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+// ---- Settings screen (TV remote: OK/Enter opens it, arrows move, Back closes) ----
+var setup = document.getElementById('setup');
+function openSetup() {
+  for (var i = 0; i < FIELDS.length; i++) document.getElementById('s_' + FIELDS[i]).value = settings[FIELDS[i]];
+  setup.style.display = 'block';
+  document.getElementById('s_shop').focus();
+}
+function closeSetup() { setup.style.display = 'none'; }
+document.getElementById('save').onclick = function () {
+  for (var i = 0; i < FIELDS.length; i++) settings[FIELDS[i]] = document.getElementById('s_' + FIELDS[i]).value;
+  save('board_settings', settings);
+  closeSetup();
+  refresh();
+};
+document.getElementById('cancel').onclick = closeSetup;
+document.onkeydown = function (e) {
+  var k = e.keyCode;
+  if (setup.style.display !== 'block') {
+    if (k === 13) openSetup();
+    return;
+  }
+  if (k === 461 || k === 27) { closeSetup(); return; } // 461 = LG remote Back
+  if (k === 38 || k === 40) { // arrows move between fields
+    var items = setup.querySelectorAll('input, button'), at = 0;
+    for (var i = 0; i < items.length; i++) if (items[i] === document.activeElement) at = i;
+    items[Math.max(0, Math.min(items.length - 1, at + (k === 40 ? 1 : -1)))].focus();
+    e.preventDefault();
+  }
+};
+document.body.onclick = function (e) { if (setup.style.display !== 'block') openSetup(); };
+
+tick();
+render();
+refresh();
+setInterval(tick, 1000);
+setInterval(refresh, 10 * 60 * 1000);
+// Reload once a day so long-running TVs never get stuck.
+setTimeout(function () { location.reload(); }, 24 * 60 * 60 * 1000);
+</script>
+</body>
+</html>

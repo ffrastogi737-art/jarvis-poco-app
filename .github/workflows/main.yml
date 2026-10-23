@@ -2,7 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "claude/**" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,23 +17,21 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
-
-      - name: Create Android Project Structure
-        run: flutter create . --platforms=android --project-name=jarvis_poco_app
-
-      - name: Enable Internet Permission in Android Manifest
-        run: |
-          sed -i 's/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">\n    <uses-permission android:name="android.permission.INTERNET"\/>/' android/app/src/main/AndroidManifest.xml
 
       - name: Install Dependencies
         run: flutter pub get
+
+      - name: Analyze & test
+        run: |
+          flutter analyze
+          flutter test
 
       - name: Build APK
         run: flutter build apk --release

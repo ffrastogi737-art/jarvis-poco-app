@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_description">Lets JARVIS press Send in WhatsApp for messages you asked JARVIS to send. It only acts for a few seconds right after JARVIS opens the chat.</string>
+</resources>

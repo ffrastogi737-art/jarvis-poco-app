@@ -7,9 +7,30 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  audioplayers: ^6.8.1
+  battery_plus: ^7.1.2
+  file_picker: ^13.1.0
   flutter:
     sdk: flutter
+  flutter_contacts: ^2.6.0
+  flutter_local_notifications: ^22.3.2
+  flutter_phone_direct_caller: ^2.2.1
+  flutter_timezone: ^5.1.1
+  flutter_tts: ^4.2.5
   http: ^1.2.0
+  image_picker: ^1.2.4
+  # 13.x pulls permission_handler_android 14.x, which needs compileSdk 37 (not supported by AGP 9.1 yet).
+  permission_handler: ^12.0.3
+  shared_preferences: ^2.5.6
+  speech_to_text: ^7.5.0
+  timezone: ^0.11.2
+  url_launcher: ^6.3.3
+  youtube_explode_dart: ^3.1.0
 
 flutter:
   uses-material-design: true
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
