@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 void main() => runApp(MyApp());
 
@@ -64,21 +65,33 @@ class _JarvisHomeState extends State<JarvisHome> with SingleTickerProviderStateM
           "User-Agent": "JarvisPocoApp"
         },
         body: jsonEncode({"command": command}),
-      );
+      ).timeout(const Duration(seconds: 45));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
           _responseMessage = data['reply'] ?? "Command executed by Ultron Core.";
         });
+      } else if (response.body.contains('ERR_NGROK')) {
+        setState(() {
+          _responseMessage = "Core Offline: ngrok tunnel band hai. Laptop par ngrok chalao.";
+        });
       } else {
         setState(() {
           _responseMessage = "Core Alert: Server HTTP ${response.statusCode}";
         });
       }
+    } on TimeoutException {
+      setState(() {
+        _responseMessage = "Core Slow: Laptop server 45s me reply nahi de raha.";
+      });
+    } on FormatException {
+      setState(() {
+        _responseMessage = "Core Alert: Server ne galat (non-JSON) reply bheja.";
+      });
     } catch (e) {
       setState(() {
-        _responseMessage = "Core Offline: Check laptop server & ngrok URL.";
+        _responseMessage = "Core Offline: Internet ya laptop server check karo. ($e)";
       });
     } finally {
       setState(() {
